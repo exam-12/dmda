@@ -1,0 +1,194 @@
+import pandas as pd
+import matplotlib.pyplot as plt
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori, association_rules
+
+# -------------------------------
+# Sample Market Basket Data (First Example)
+# -------------------------------
+transactions = [
+    ['Milk', 'Bread'],
+    ['Milk', 'Diapers', 'Beer'],
+    ['Bread', 'Butter'],
+    ['Milk', 'Bread', 'Butter'],
+    ['Milk', 'Juice']
+]
+
+# Convert transactions to One-Hot Encoding format
+te = TransactionEncoder()
+te_array = te.fit(transactions).transform(transactions)
+df = pd.DataFrame(te_array, columns=te.columns_)
+
+print("Dataset (One Hot Encoded):")
+print(df)
+
+# -------------------------------
+# Frequent Itemset Mining (Apriori)
+# -------------------------------
+frequent_itemsets = apriori(
+    df,
+    min_support=0.4,
+    use_colnames=True
+)
+
+print("\nFrequent Itemsets:")
+print(frequent_itemsets)
+
+# -------------------------------
+# Association Rules Generation
+# -------------------------------
+rules = association_rules(
+    frequent_itemsets,
+    metric="confidence",
+    min_threshold=0.6
+)
+
+print("\nAssociation Rules:")
+print(rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+
+# -------------------------------
+# Strong Rule Filtering
+# -------------------------------
+strong_rules = rules[
+    (rules['confidence'] >= 0.7) &
+    (rules['lift'] > 1)
+]
+
+print("\nStrong Rules:")
+print(strong_rules[['antecedents', 'consequents', 'confidence', 'lift']])
+
+# -------------------------------
+# Second Dataset (Assignment Dataset)
+# -------------------------------
+transactions = [
+    ['Milk', 'Bread', 'Butter'],
+    ['Beer', 'Bread'],
+    ['Milk', 'Bread', 'Beer', 'Butter'],
+    ['Bread', 'Butter'],
+    ['Milk', 'Bread', 'Butter'],
+    ['Beer', 'Butter'],
+    ['Milk', 'Bread', 'Beer'],
+    ['Milk', 'Butter']
+]
+
+# Prepare dataset
+df = pd.DataFrame(transactions)
+
+# One-hot encoding using pandas method
+one_hot = pd.get_dummies(df.stack()).groupby(level=0).sum()
+
+print("\nPrepared Dataset:")
+print(one_hot)
+
+# -------------------------------
+# Apriori Algorithm (Assignment Requirement)
+# -------------------------------
+frequent_itemsets = apriori(
+    one_hot,
+    min_support=0.3,
+    use_colnames=True
+)
+
+print("\nFrequent Itemsets (min_support=0.3):")
+print(frequent_itemsets)
+
+# -------------------------------
+# Association Rules Generation
+# -------------------------------
+rules = association_rules(
+    frequent_itemsets,
+    metric="confidence",
+    min_threshold=0.7
+)
+
+print("\nAssociation Rules:")
+print(rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+
+# -------------------------------
+# Analysis Answers
+# -------------------------------
+
+# Most frequently bought item
+item_frequency = one_hot.sum().sort_values(ascending=False)
+print("\nMost Frequently Bought Item:")
+print(item_frequency.head(1))
+
+# Strong rule recommendation
+if not rules.empty:
+    best_rule = rules.sort_values(
+        ['lift', 'confidence'],
+        ascending=False
+    ).iloc[0]
+
+    print("\nRecommended Rule:")
+    print(best_rule[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+
+# Filter rules with lift > 1.2
+strong_rules = rules[rules['lift'] > 1.2]
+
+print("\nRules with Lift > 1.2:")
+print(strong_rules[['antecedents', 'consequents', 'support', 'confidence', 'lift']])
+
+# -------------------------------
+# Visualization
+# -------------------------------
+plt.figure(figsize=(6,4))
+plt.scatter(rules['support'], rules['confidence'])
+plt.xlabel("Support")
+plt.ylabel("Confidence")
+plt.title("Association Rules Scatter Plot")
+plt.grid()
+plt.show()
+
+
+
+
+//unit3
+# Import Libraries
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.linear_model import LinearRegression
+# Independent variable (X)
+X = np.array([1, 2, 3, 4, 5]).reshape(-1, 1)
+
+# Dependent variable (Y)
+Y = np.array([2, 4, 5, 4, 5])
+
+model = LinearRegression()
+model.fit(X, Y)
+
+print("Slope (m):", model.coef_)      # slope (m)
+
+print("Intercept (c):", model.intercept_)  # intercept (c)
+
+Y_pred = model.predict(X)
+
+print("Predicted values:", Y_pred)
+
+plt.scatter(X, Y, color='blue')   # Actual points
+plt.plot(X, Y_pred, color='red')  # Regression line
+plt.xlabel("Study Hours")
+plt.ylabel("Marks")
+plt.title("Linear Regression Example")
+plt.show()
+
+
+
+import numpy as np
+from sklearn.linear_model import LinearRegression
+
+X = np.array([1,1,1,2,2,3,3,4]).reshape(-1,1)
+
+Y = np.array([25,28,30,45,48,65,70,90])
+
+model = LinearRegression()
+
+model.fit(X, Y)
+print("Slope:", model.coef_)
+
+print("Intercept:", model.intercept_)
+
+predicted_price = model.predict([[2]])
+
+print("Predicted price for 2 BHK:", predicted_price)
