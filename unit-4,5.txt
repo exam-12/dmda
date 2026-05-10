@@ -1,0 +1,419 @@
+#K-MEANS 
+
+import pandas as pd 
+import matplotlib.pyplot as plt 
+from sklearn.cluster import KMeans 
+# Step 1: Load data 
+data = pd.read_csv("people.csv") 
+print("Our Data:") 
+print(data) 
+# Step 2: Apply K-Means 
+X = data[['Height', 'Weight']] 
+model = KMeans(n_clusters=2, random_state=0) 
+model.fit(X) 
+# Step 3: Add cluster result to data 
+data['Cluster'] = model.labels_ 
+# Step 4: Print clusters 
+print("\n-- Cluster 0 --") 
+print(data[data['Cluster'] == 0]) 
+print("\n-- Cluster 1 --") 
+print(data[data['Cluster'] == 1]) 
+# Step 5: Plot 
+centroids = model.cluster_centers_ 
+for i in range(2): 
+    color = 'red' if i == 0 else 'blue' 
+        # Plot data points of this cluster 
+    cluster_data = data[data['Cluster'] == i] 
+    plt.scatter(cluster_data['Height'], cluster_data['Weight'], 
+                color=color, s=100) 
+     
+    # Plot centroid of this cluster 
+    plt.scatter(centroids[i, 0], centroids[i, 1], 
+                color=color, marker='X', s=200) 
+plt.xlabel("Height") 
+plt.ylabel("Weight") 
+plt.title("K-Means Clustering") 
+centroids = model.cluster_centers_ 
+ 
+plt.show() 
+ 
+ 
+
+
+
+
+
+
+
+#Apriori
+
+import pandas as pd 
+from mlxtend.preprocessing import TransactionEncoder 
+from mlxtend.frequent_patterns import apriori, association_rules 
+# DATA WRITTEN DIRECTLY - NO CSV FILE NEEDED 
+transactions = [ 
+['Bread', 'Milk', 'Butter'], 
+['Bread', 'Diapers', 'Beer'], 
+['Milk', 'Diapers', 'Beer'], 
+['Bread', 'Milk', 'Diapers', 'Beer'], 
+['Bread', 'Milk', 'Coke'], 
+['Bread', 'Milk', 'Butter'], 
+['Milk', 'Beer', 'Diapers'], 
+['Bread', 'Diapers', 'Beer'], 
+['Bread', 'Milk', 'Diapers'], 
+['Milk', 'Butter', 'Coke'], 
+] 
+# Encode into True/False table 
+te = TransactionEncoder() 
+df = pd.DataFrame(te.fit(transactions).transform(transactions), columns=te.columns_) 
+# STEP 1 - Learn all unique items from transactions 
+#te.fit(transactions) 
+# STEP 2 - Convert transactions into True/False array 
+#array = te.transform(transactions) 
+# STEP 3 - Convert array into a proper table with column names 
+#df = pd.DataFrame(array, columns=te.columns_) 
+# Find frequent itemsets 
+itemsets = apriori(df, min_support=0.3, use_colnames=True) 
+# Generate rules 
+rules = association_rules(itemsets, metric="confidence", min_threshold=0.1) 
+# Filter strong rules 
+strong = rules[rules["confidence"] >= 0.5].sort_values("confidence", ascending=False) 
+# Print results 
+print("===== STRONG ASSOCIATION RULES =====\n") 
+for _, row in strong.iterrows(): 
+print(f"  {list(row['antecedents'])}  -->  {list(row['consequents'])}") 
+print(f"  Confidence : {round(row['confidence'] * 100)}%") 
+print(f"  Support    : {round(row['support'] * 100)}%") 
+print(f"  Lift       : {round(row['lift'], 2)}") 
+print() 
+
+
+
+
+
+
+
+
+
+#KNN
+
+import pandas as pd 
+from sklearn.neighbors import NearestNeighbors 
+# Load dataset 
+data = pd.read_csv("movies_knn.csv") 
+# Fix column names 
+data.columns = data.columns.str.strip() 
+# Features 
+X = data[['Action', 'SciFi', 'Comedy']] 
+# Model 
+model = NearestNeighbors(n_neighbors=3) 
+model.fit(X) 
+# New user data 
+new_user = pd.DataFrame([{ 
+'Action': 6, 
+'SciFi': 5, 
+'Comedy': 5 
+}]) 
+# Find nearest neighbors 
+distances, indices = model.kneighbors(new_user) 
+# Get recommendations 
+recommended_movies = data.iloc[indices[0]]['Movie'].values 
+print("Top 3 Recommended Movies:") 
+for movie in recommended_movies: 
+print(movie) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#SVM
+
+# Step 1: Import libraries 
+import pandas as pd 
+import matplotlib.pyplot as plt 
+from sklearn import svm 
+# Step 2: Load CSV file 
+data = pd.read_csv("emails.csv") 
+# Step 3: Extract features (X) and labels (y) 
+X = data[['SpamWords', 'Links']].values 
+y = data['Class'].values 
+# Step 4: Create and train SVM model 
+model = svm.SVC(kernel='linear') 
+model.fit(X, y) 
+# Step 5: Plot data points 
+for i in range(len(X)): 
+if y[i] == 1: 
+plt.scatter(X[i][0], X[i][1], color='red',  marker='o') 
+else: 
+plt.scatter(X[i][0], X[i][1], color='blue', marker='o') 
+# Step 6: Plot decision boundary 
+w = model.coef_[0] 
+b = model.intercept_[0] 
+x_points = [0, 10] 
+y_points  = [-(w[0]*x + b)/w[1] for x in x_points] 
+plt.plot(x_points, y_points, color='black', label='Decision Boundary') 
+# Step 7: Add new data point 
+new_point = [4, 2] 
+prediction = model.predict([new_point]) 
+plt.scatter(new_point[0], new_point[1], color='green', marker='*', 
+s=200, label='New Email') 
+# Step 8: Print prediction 
+if prediction[0] == 1: 
+print("New Email is Spam") 
+else: 
+print("New Email is Not Spam") 
+#print("Accuracy:", model.score(X, y)) 
+# Step 9: Labels 
+plt.xlabel("Spam Words") 
+plt.ylabel("Links") 
+plt.title("SVM using CSV Data") 
+plt.legend() 
+plt.grid(True) 
+ 
+# Step 10: Show plot 
+plt.show() 
+
+
+
+
+
+
+
+
+
+
+
+#DECISION TREE-1
+
+import pandas 
+from sklearn import tree 
+from sklearn.tree import DecisionTreeClassifier, plot_tree 
+import matplotlib.pyplot as plt 
+from sklearn.metrics import accuracy_score 
+# Step 1: Read dataset from CSV file 
+df = pandas.read_csv("MobilePurchase.csv") 
+print("Original Dataset:\n", df) 
+# Step 2: Convert categorical data (text) into numeric values using mapping 
+age_map = {'Young': 0, 'Middle': 1, 'Senior': 2} 
+budget_map = {'Low': 0, 'Medium': 1, 'High': 2} 
+brand_map = {'Yes': 1, 'No': 0} 
+buy_map = {'Yes': 1, 'No': 0} 
+df['Age'] = df['Age'].map(age_map) 
+df['Budget'] = df['Budget'].map(budget_map) 
+df['Brand Preference'] = df['Brand Preference'].map(brand_map) 
+df['Buy Mobile'] = df['Buy Mobile'].map(buy_map) 
+print("\nEncoded Dataset:\n", df) 
+# Step 3: Select features (inputs) and target (output) 
+features_cols = ['Age', 'Budget', 'Brand Preference'] 
+X = df[features_cols] 
+y = df['Buy Mobile'] 
+# Step 4: Create and train Decision Tree model using entropy 
+clf = DecisionTreeClassifier(criterion="entropy", max_depth=3) 
+clf.fit(X, y) 
+# Step 5: Display decision tree rules in text format 
+print("\nDecision Tree Rules:\n") 
+print(tree.export_text(clf, feature_names=features_cols)) 
+# Step 6: Create plotting area (figure and axis) 
+fig, ax = plt.subplots(figsize=(14, 7)) 
+# Step 7: Plot the decision tree 
+plot_tree( 
+clf, 
+feature_names=features_cols, 
+class_names=['No', 'Yes'], 
+filled=True, 
+rounded=True, 
+fontsize=12, 
+ax=ax 
+) 
+# Step 8: Add title to the plot 
+ax.set_title("Decision Tree – Mobile Purchase (Entropy)", 
+fontsize=14, fontweight="bold", pad=16) 
+# Step 9: Adjust layout for better spacing 
+plt.tight_layout() 
+# Step 10: Display the decision tree 
+plt.show()  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#DECISION TREE-2
+
+import pandas as pd 
+from sklearn.tree import DecisionTreeClassifier 
+from sklearn.model_selection import train_test_split 
+from sklearn import tree 
+import matplotlib.pyplot as plt 
+from sklearn.preprocessing import LabelEncoder 
+# Step 1: Load dataset 
+df = pd.read_csv("MobilePurchase.csv") 
+# Step 2: Encode categorical columns 
+le = LabelEncoder() 
+for col in df.columns: 
+df[col] = le.fit_transform(df[col]) 
+# Step 3: Features and Target 
+X = df.drop("Buy Mobile", axis=1) 
+y = df["Buy Mobile"] 
+# Step 4: Split data 
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2) 
+# Step 5: Create model (USE ENTROPY HERE 
+✅
+) 
+model = DecisionTreeClassifier(criterion='entropy') 
+# Step 6: Train model 
+model.fit(X_train, y_train) 
+# Step 7: Plot tree 
+plt.figure(figsize=(10,7)) 
+tree.plot_tree(model, 
+feature_names=X.columns, 
+class_names=['No', 'Yes'], 
+filled=True) 
+plt.title("Decision Tree (Entropy) - Mobile Purchase") 
+plt.show() 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ENCODING -1 
+
+import pandas as pd 
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder 
+# Load dataset 
+df = pd.read_csv("encoding.csv") 
+print("Original Dataset:") 
+print(df) 
+# ────────────────────────────────────────── 
+# 1. LABEL ENCODING — Gender 
+#    Automatically assigns 0 / 1 
+#    Female = 0, Male = 1 
+# ────────────────────────────────────────── 
+le = LabelEncoder() 
+df["Gender_Label"] = le.fit_transform(df["Gender"]) 
+print("\nAfter Label Encoding (Gender):") 
+print(df[["Gender", "Gender_Label"]]) 
+# ────────────────────────────────────────── 
+# 2. ORDINAL ENCODING — Size 
+#    We define the order: Small=0, Medium=1, Large=2 
+# ────────────────────────────────────────── 
+size_order = ["Small", "Medium", "Large"] 
+oe = OrdinalEncoder(categories=[size_order]) # Fix: Wrapped size_order in a list 
+df["Size_Ordinal"] = oe.fit_transform(df[["Size"]]).astype(int) 
+print("\nAfter Ordinal Encoding (Size):") 
+print(df[["Size", "Size_Ordinal"]]) 
+# ────────────────────────────────────────── 
+# 3. ONE-HOT ENCODING — Color 
+#    Each color gets its own column (1 = yes, 0 = no) 
+# ────────────────────────────────────────── 
+df = pd.get_dummies(df, columns=["Color"]) 
+#df = pd.get_dummies(df, columns=['Color'], dtype=int) 
+print("\nAfter One-Hot Encoding (Color):") 
+print(df[["Student_ID", "Color_Blue", "Color_Green", "Color_Red"]]) 
+# ────────────────────────────────────────── 
+# Final Result 
+# ────────────────────────────────────────── 
+print("\nFinal Dataset:") 
+print(df) 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+#ENCODING-2
+
+import pandas as pd 
+from sklearn.preprocessing import LabelEncoder, OneHotEncoder, OrdinalEncoder 
+# ----------------------------- 
+# 1. Create dataset 
+# ----------------------------- 
+data = { 
+"Student_ID": [1,2,3,4,5,6,7,8,9,10], 
+"Department": ["IT","CS","IT","EC","ME","CS","IT","EC","ME","CS"], 
+"Gender": 
+["Male","Female","Male","Female","Male","Female","Male","Female","Male","Female"], 
+"City": 
+["Ahmedabad","Mumbai","Delhi","Ahmedabad","Pune","Delhi","Mumbai","Pune","Ahmeda
+bad","Mumbai"], 
+"Course_Level": ["UG","PG","UG","PG","UG","PG","UG","PG","UG","PG"], 
+"Performance": 
+["Good","Excellent","Average","Good","Average","Excellent","Good","Average","Good","Exc
+ellent"], 
+"Marks": [78,85,60,88,55,92,81,67,74,90] 
+} 
+df = pd.DataFrame(data) 
+print("Original Dataset:\n") 
+print(df) 
+# --------------------------------------------------- 
+# 2. LABEL ENCODING (Gender) 
+# --------------------------------------------------- 
+le = LabelEncoder() 
+df['Gender_Label'] = le.fit_transform(df['Gender']) 
+print("\nAfter Label Encoding (Gender):") 
+print(df[['Gender', 'Gender_Label']]) 
+# --------------------------------------------------- 
+# 3. ONE-HOT ENCODING (Department + City) 
+# --------------------------------------------------- 
+df = pd.get_dummies(df, columns=['Department', 'City']) 
+print("\nAfter One-Hot Encoding (Department + City):") 
+print(df_ohe) 
+# --------------------------------------------------- 
+# 4. ORDINAL ENCODING (Performance + Course_Level) 
+# --------------------------------------------------- 
+# Define order for ordinal data 
+performance_order = ['Average', 'Good', 'Excellent'] 
+course_order = ['UG', 'PG'] 
+oe = OrdinalEncoder(categories=[performance_order, course_order]) 
+df[['Performance_Ordinal', 'Course_Level_Ordinal']] = oe.fit_transform( 
+df[['Performance', 'Course_Level']] 
+) 
+print("\nAfter Ordinal Encoding:") 
+print(df[['Performance', 'Performance_Ordinal', 'Course_Level', 
+'Course_Level_Ordinal']]) 
+ 
