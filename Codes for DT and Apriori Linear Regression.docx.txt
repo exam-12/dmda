@@ -1,0 +1,177 @@
+﻿import pandas as pd
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.model_selection import train_test_split
+from sklearn import tree
+import matplotlib.pyplot as plt
+from sklearn.preprocessing import LabelEncoder
+
+
+# Step 1: Load dataset
+df = pd.read_csv("LaptopPurchase.csv")
+
+
+print("Dataset:")
+print(df)
+
+
+# Step 2: Encode categorical columns
+le = LabelEncoder()
+
+
+for col in df.columns:
+    df[col] = le.fit_transform(df[col])
+
+
+# Step 3: Features and Target
+X = df.drop("Buy Laptop", axis=1)
+
+
+y = df["Buy Laptop"]
+
+
+# Step 4: Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2
+)
+
+
+# Step 5: Create model using Entropy
+model = DecisionTreeClassifier(criterion='entropy')
+
+
+# Step 6: Train model
+model.fit(X_train, y_train)
+
+
+# Step 7: Plot Decision Tree
+plt.figure(figsize=(10,7))
+
+
+tree.plot_tree(model,
+               feature_names=X.columns,
+               class_names=['No', 'Yes'],
+               filled=True)
+
+
+plt.title("Decision Tree (Entropy) - Laptop Purchase")
+
+
+plt.show()
+Apriori Algorithm 
+
+
+import pandas as pd
+from mlxtend.preprocessing import TransactionEncoder
+from mlxtend.frequent_patterns import apriori
+from mlxtend.frequent_patterns import association_rules
+
+
+# Step 1: Load dataset
+data = pd.read_csv("shopping_data.csv")
+
+
+print("Dataset:")
+print(data)
+
+
+# Step 2: Convert into transaction format
+transactions = []
+
+
+for item in data["Items"]:
+    transactions.append(item.split())
+
+
+# Step 3: Transaction Encoding
+te = TransactionEncoder()
+
+
+te_data = te.fit(transactions).transform(transactions)
+
+
+df = pd.DataFrame(te_data, columns=te.columns_)
+
+
+# Step 4: Apply Apriori Algorithm
+frequent_items = apriori(df,
+                         min_support=2/20,
+                         use_colnames=True)
+
+
+print("\nFrequent Itemsets:")
+print(frequent_items)
+
+
+# Step 5: Generate Association Rules
+rules = association_rules(frequent_items,
+                          metric="confidence",
+                          min_threshold=0.6)
+
+
+# Step 6: Display Rules
+print("\nAssociation Rules:")
+
+
+print(rules[['antecedents',
+             'consequents',
+             'support',
+             'confidence']])
+
+
+
+
+Linear REgession 
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+
+
+# Step 1: Load dataset
+df = pd.read_csv("student_score.csv")
+
+
+print(df.head())
+
+
+# Step 2: Features and target
+X = df.drop('FinalScore', axis=1)
+
+
+y = df['FinalScore']
+
+
+# Step 3: Split dataset
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42
+)
+
+
+# Step 4: Create and train model
+model = LinearRegression()
+
+
+model.fit(X_train, y_train)
+
+
+# Step 5: Predict values
+y_pred = model.predict(X_test)
+
+
+# Step 6: Plot Actual vs Predicted
+plt.figure()
+
+
+plt.scatter(y_test, y_pred)
+
+
+plt.xlabel("Actual Values")
+
+
+plt.ylabel("Predicted Values")
+
+
+plt.title("Actual vs Predicted (Linear Regression)")
+
+
+plt.show()
